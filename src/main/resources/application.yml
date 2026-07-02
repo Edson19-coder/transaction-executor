@@ -1,0 +1,13 @@
+spring:
+ application.name: transaction-executor
+ #config.import: configserver:${SPRING_CLOUD_URI} # comment if you are in the local
+ cloud:
+  config:
+   enabled: false # true = deploy , false = local
+   fail-fast: true
+
+logging:
+ level:
+  root: WARN
+
+jasypt.encryptor.password: ${JASYPT_PASSWORD:spin} # (deploy:local)

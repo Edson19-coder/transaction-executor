@@ -1,0 +1,114 @@
+server:
+  servlet:
+    context-path: /service
+  connection-timeout: 30s
+  tomcat:
+    max-threads: 200
+  port: 8833
+
+spring:
+  security:
+    user:
+      name: ENC(5wPC+kpFPNMsopjvOHptqA==)
+      password: ENC(Gb/9/tt0pbYd3nuE/WuO8g==)
+  banner:
+    location: classpath:banner.txt
+  jpa:
+    properties:
+      hibernate:
+        proc:
+          param_null_passing: true
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+
+netpay:
+  batch-id: ENC(jp6XrIagsetgDclsd3PyUKmRZCn2Xnpl)
+  datasource:
+    term:
+      jdbcUrl: jdbc:oracle:thin:@127.0.0.1:1120:DB01
+      username: NS_TERM_PRD
+      password: ENC(pJQQYspREn19swDjII+ONDX44PyU1zZl)
+      driver-class-name: oracle.jdbc.driver.OracleDriver
+      initialSize: 1
+      minIdle: 5
+      maxIdle: 5
+      maxActive: 20
+      maxWait: 60000
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      validationQuery: select 1 from dual
+      testWhileIdle: true
+    aurora:
+      jdbcUrl: jdbc:mysql://127.0.0.1:3306/NS_TERM_PRD
+      username: admin
+      password: ENC(ENeHBjhDm7N/wj0jWU/EaZblSO/kZ8FI)
+      driverClassName: com.mysql.cj.jdbc.Driver
+      pool-name: aurora-pool
+      maximumPoolSize: 20
+      minimumIdle: 5
+      initialSize: 1
+      minIdle: 5
+      maxIdle: 10
+      maxActive: 50
+      maxWait: 60000
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      validationQuery: select 1
+      testWhileIdle: true
+      testOnBorrow: true
+      validationInterval: 30000
+
+
+origin:
+  datasource:
+    jdbcUrl: jdbc:oracle:thin:@127.0.0.1:1120:DB01
+    username: NP_ORIGIN
+    password: ENC(WMqvnbOKdoT9qzAxSP+z2xkgfsHy/74c)
+    driver-class-name: oracle.jdbc.OracleDriver
+    initialSize: 1
+    minIdle: 5
+    maxIdle: 8
+    maxActive: 10
+    maxWait: 60000
+
+prometheus:
+  validateUserBuckets: .05,.25,.5,.75,1,2,3,4,5
+
+management:
+  security:
+    enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: 'health,metrics,custom,prometheus'
+  endpoint:
+    metrics:
+      enabled: true
+    health:
+      show-details: NEVER
+      defaults:
+        enabled: true
+      diskspace:
+        enabled: true
+  info:
+    git:
+      mode: full
+
+security:
+  accessTokenValidity: 43200
+  refreshTokenValidity: 86400
+  oauth2:
+    resource:
+      id: oauth2_id
+    resource-cognito:
+      userInfoUri: https://netpay-sso-test.auth.us-west-2.amazoncognito.com/oauth2/userInfo
+      tokenInfoUri: https://netpay-sso-test.auth.us-west-2.amazoncognito.com/oauth2/token
+      jwk:
+        key-set-uri: https://cognito-idp.us-west-2.amazonaws.com/us-west-2_x8CXDMSHo/.well-known/jwks.json
+      client:
+        clientId: 40r9itj24kv5cqa3jlav56o65h
+  jks:
+    file: dev_netpay.jks
+    password: ENC(RNNdxMis4wTqSpwHeZVZ+ElXk34wW5q1)
+    alias: ENC(RNNdxMis4wTqSpwHeZVZ+ElXk34wW5q1)
