@@ -35,7 +35,6 @@ local.properties
 .vscode/
 *.log
 *.hprof
-src/main/resources/application-local.yml
 
 /*.log
 /*.hprof
