@@ -1,0 +1,82 @@
+server:
+  connection-timeout: 30s
+  tomcat:
+    max-threads: 200
+  port: 9001
+
+spring:
+  application:
+    name: transaction-executor
+  security:
+    user:
+      name: spin
+      password: password
+  banner:
+    location: classpath:banner.txt
+  datasource:
+    url: jdbc:oracle:thin:@127.0.0.1:1521/orclpdb
+    username: mi_nuevo_usuario
+    password: TuPasswordSeguro123$
+    driver-class-name: oracle.jdbc.OracleDriver
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        proc:
+          param_null_passing: true
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+
+management:
+  security:
+    enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: 'health,metrics,custom,prometheus'
+  endpoint:
+    metrics:
+      enabled: true
+    health:
+      show-details: NEVER
+      defaults:
+        enabled: true
+      diskspace:
+        enabled: true
+  info:
+    git:
+      mode: full
+
+app:
+  security:
+    api-key: TS6s8yPvltxXpB2hBq6AzksHj4jjCIZI
+  config:
+    rest-client:
+      provider:
+        baseUrl: https://c4aa956c-a416-4a33-bd75-faf58918ee45.mock.pstmn.io
+        endpoints:
+          transaction-execute: /provider/v1/execute
+    rest-client:
+      timeout:
+        connection: 10
+        read: 10
+
+business:
+  rules:
+    debit-max-amount: 10000
+    allowed-currencies: MXN
+
+resilience4j:
+  retry:
+    instances:
+      provider:
+        max-attempts: 3
+        wait-duration: 200ms
+        enable-exponential-backoff: false
+        exponential-backoff-multiplier: 2 # Si exponential-backoff es true (wait-duration * 2)
+  circuitbreaker:
+    instances:
+      provider:
+        failure-rate-threshold: 50 # El porcentaje de fallos que abre el circuito
+        sliding-window-size: 10 # Tamaño de la ventana (Últimas llamadas para calcular el %)
