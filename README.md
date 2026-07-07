@@ -40,7 +40,7 @@ Cada componente tiene una única razón para cambiar. Al aislar la exposición d
 ```bash
    git clone https://github.com/Edson19-coder/transaction-executor
 ```
-2. **Archivo de configuración para despliegue local:** Se debe de generar un archivo local de configuración en la carpeta resource del proyecto, esto base al archivo de despliegue de desarrollo: [smart-reports-dev.yml](https://gitlab.com/netpaymx/configuracion-cloud/ejemplo-produccion/-/blob/master/smart-reports-dev.yml)
+2. **Archivo de configuración para despliegue local:** Se debe de generar un archivo local de configuración en la carpeta resource del proyecto, esto base al archivo de despliegue de desarrollo: [transaction-executor-local.yml](src/main/resources/application-local.yml)
 3. **Build:** Generar jar de la aplicación previamente con gradle:
 ```bash
     gradle build
