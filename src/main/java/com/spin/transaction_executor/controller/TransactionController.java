@@ -3,6 +3,7 @@ package com.spin.transaction_executor.controller;
 import com.spin.transaction_executor.domain.request.TransactionHistoryRequest;
 import com.spin.transaction_executor.domain.request.TransactionRequest;
 import com.spin.transaction_executor.domain.response.TransactionResponse;
+import com.spin.transaction_executor.domain.response.list.TransactionHistoryResponse;
 import com.spin.transaction_executor.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,8 +32,8 @@ public class TransactionController {
             @ApiResponse(responseCode = "503", description = "Error de comunicación con el proveedor externo", content = @Content),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
     })
-    public ResponseEntity<?> sendTransaction(@RequestBody @Valid TransactionRequest request) {
-        return this.transactionService.sendTransaction(request);
+    public TransactionResponse sendTransaction(@RequestBody @Valid TransactionRequest request) {
+        return ResponseEntity.ok(this.transactionService.sendTransaction(request)).getBody();
     }
 
     @GetMapping
@@ -41,7 +42,7 @@ public class TransactionController {
             @ApiResponse(responseCode = "200", description = "Historial obtenido o lista vacía", content = @Content),
             @ApiResponse(responseCode = "400", description = "Parámetros de paginación o filtros inválidos", content = @Content)
     })
-    public ResponseEntity<?> getTransactios(@ModelAttribute @Valid TransactionHistoryRequest request) {
-        return this.transactionService.getTransactions(request);
+    public TransactionHistoryResponse getTransactios(@ModelAttribute @Valid TransactionHistoryRequest request) {
+        return ResponseEntity.ok(this.transactionService.getTransactions(request)).getBody();
     }
 }

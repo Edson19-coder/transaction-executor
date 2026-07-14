@@ -1,10 +1,12 @@
 package com.spin.transaction_executor.repository.impl;
 
+import com.spin.transaction_executor.domain.entity.TransactionDbEntity;
 import com.spin.transaction_executor.domain.request.TransactionHistoryRequest;
 import com.spin.transaction_executor.domain.response.TransactionResponse;
 import com.spin.transaction_executor.repository.TransactionRepository;
 import com.spin.transaction_executor.util.CardType;
 import com.spin.transaction_executor.util.Constants;
+import com.spin.transaction_executor.util.Util;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.*;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Repository
@@ -64,10 +68,9 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     public List<TransactionResponse> getTransactions(TransactionHistoryRequest request) {
         log.info("Executing procedure PKG_TRANSACTION.GET_TRANSACTION()");
         EntityManager em = entityManagerFactory.createEntityManager();
-        List<TransactionResponse> result = new ArrayList<>();
         try{
             if (em.isOpen()) {
-                StoredProcedureQuery query = em.createStoredProcedureQuery("PKG_TRANSACTION.GET_TRANSACTION")
+                StoredProcedureQuery query = em.createStoredProcedureQuery("PKG_TRANSACTION.GET_TRANSACTION", TransactionDbEntity.class)
                         .registerStoredProcedureParameter(1, String.class, ParameterMode.IN)
                         .registerStoredProcedureParameter(2, String.class, ParameterMode.IN)
                         .registerStoredProcedureParameter(3, String.class, ParameterMode.IN)
@@ -76,31 +79,12 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                         .registerStoredProcedureParameter(6, Class.class, ParameterMode.REF_CURSOR)
                         .setParameter(1, StringUtils.isNotEmpty(request.getAccountId()) ? request.getAccountId() : "null")
                         .setParameter(2, StringUtils.isNotEmpty(request.getStatus()) ? request.getStatus() : "null")
-                        .setParameter(3, request.getType() != null && StringUtils.isNotEmpty(request.getType().toString()) ? request.getType().toString() : "null")
+                        .setParameter(3, request.getType() != null ? request.getType().name() : "null")
                         .setParameter(4, request.getPage())
                         .setParameter(5, request.getLimit());
                 query.execute();
-                List<Object[]> rptTrx = query.getResultList();
-                if (rptTrx != null) {
-                    for (Object o : rptTrx) {
-                        Object[] obj = (Object[]) o;
-                        TransactionResponse trx = TransactionResponse.builder()
-                                .id(String.valueOf(obj[0]))
-                                .accountId(String.valueOf(obj[1]))
-                                .type(CardType.valueOf(String.valueOf(obj[2])))
-                                .amount(obj[3] != null ? (BigDecimal) obj[3] : null)
-                                .currency(String.valueOf(obj[4]))
-                                .description(String.valueOf(obj[5]))
-                                .status(String.valueOf(obj[6]))
-                                .providerTransactionId(String.valueOf(obj[7]))
-                                .balanceAfter(obj[8] != null ? (BigDecimal) obj[8] : null)
-                                .createdAt(String.valueOf(obj[9]))
-                                .build();
-                        result.add(trx);
-                    }
-
-                    return result;
-                }
+                List<TransactionDbEntity> rptTrx = query.getResultList();
+                return rptTrx.stream().map(Util::mapGetTransactions).toList();
             }
         } catch(Exception e) {
             log.error(Constants.ERROR, e.getMessage());

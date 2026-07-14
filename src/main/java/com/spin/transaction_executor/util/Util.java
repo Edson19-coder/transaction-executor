@@ -1,5 +1,6 @@
 package com.spin.transaction_executor.util;
 
+import com.spin.transaction_executor.domain.entity.TransactionDbEntity;
 import com.spin.transaction_executor.domain.request.TransactionHistoryRequest;
 import com.spin.transaction_executor.domain.request.TransactionRequest;
 import com.spin.transaction_executor.domain.response.ProviderTransactionResponse;
@@ -47,7 +48,7 @@ public class Util {
     }
 
     public static boolean validTransactionHistoryRequest(TransactionHistoryRequest request) {
-        return (StringUtils.isNotBlank(request.getAccountId()) || StringUtils.isNotBlank(request.getStatus()) || StringUtils.isNotBlank(request.getType().toString()) || request.getPage() > 0 || request.getLimit() > 0);
+        return (StringUtils.isNotBlank(request.getAccountId()) || StringUtils.isNotBlank(request.getStatus()) || request.getType() != null || (request.getPage() != null && request.getPage() > 0) || (request.getLimit() != null && request.getLimit() > 0));
     }
 
     public static TransactionHistoryResponse fillTransactionHistoryResponse(List<TransactionResponse> transactions, Long totalTrx, Integer page, Integer limit) {
@@ -76,5 +77,21 @@ public class Util {
         } catch (Exception databaseException) {
             log.error("Database failure while saving transaction logs: {}", databaseException.getMessage());
         }
+    }
+
+    // Al usar paginación esto no es tan critico , solamente es critico cuando es un big data (mas de 100,000 registros)
+    public static TransactionResponse mapGetTransactions(TransactionDbEntity entity) {
+        return TransactionResponse.builder()
+                .id(entity.getId())
+                .accountId(entity.getAccountId())
+                .type(entity.getType())
+                .amount(entity.getAmount())
+                .currency(entity.getCurrency())
+                .description(entity.getDescription())
+                .status(entity.getStatus())
+                .providerTransactionId(entity.getProviderTransactionId())
+                .balanceAfter(entity.getBalanceAfter())
+                .createdAt(entity.getCreatedAt())
+                .build();
     }
 }

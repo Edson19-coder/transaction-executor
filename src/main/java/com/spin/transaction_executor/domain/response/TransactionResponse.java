@@ -1,13 +1,11 @@
 package com.spin.transaction_executor.domain.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.spin.transaction_executor.util.CardType;
 import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
 @Data
 public class TransactionResponse {

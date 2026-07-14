@@ -15,9 +15,9 @@ public class TransactionHistoryRequest {
     private String status;
     @Schema(description = "Tipo de tarjeta utilizada", example = "DEBIT", allowableValues = {"DEBIT", "CREDIT"})
     private CardType type;
-    @Schema(description = "Número de página para la paginación", example = "1")
+    @Schema(description = "Número de página para la paginación", example = "1", defaultValue = "1")
     @Min(1)
-    private Integer page;
+    private Integer page = 1;
     @Schema(description = "Cantidad de registros por página", example = "10", defaultValue = "10")
     @Min(1)
     private Integer limit = 10;
