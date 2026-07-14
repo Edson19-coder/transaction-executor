@@ -14,9 +14,11 @@ import java.util.UUID;
 @Component
 @Slf4j
 public class GlobalLoggingAspect {
+    // Intercepta solo los metodos del package definido (service)
     @Pointcut("execution(* com.spin.transaction_executor.service..*.*(..))")
     public void allServiceMethods() {}
 
+    // Input
     @Before("allServiceMethods()")
     public void logInput(JoinPoint joinPoint) {
         MDC.put(Constants.REQUEST_ID, UUID.randomUUID().toString());
@@ -26,6 +28,7 @@ public class GlobalLoggingAspect {
         }
     }
 
+    // Output
     @AfterReturning(pointcut = "allServiceMethods()", returning = "result")
     public void logOutput(Object result) {
         if (result != null) {
@@ -33,6 +36,7 @@ public class GlobalLoggingAspect {
         }
     }
 
+    // Despues de un excepción
     @AfterThrowing(pointcut = "allServiceMethods()", throwing = "e")
     public void logExceptionOutput(Exception e) {
         if (e instanceof GlobalException statefulEx && statefulEx.getData() != null) {
@@ -41,7 +45,7 @@ public class GlobalLoggingAspect {
             log.error("Service execution failed unexpectedly: {}", e.getMessage(), e);
         }
     }
-
+    
     @After("allServiceMethods()")
     public void afterService() {
         MDC.remove(Constants.REQUEST_ID);

@@ -96,7 +96,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         // Verificamos con el count si tenemos transacciones disponibles que mostrar base a los filtros
-        Long totalTrx = transactionRepository.getTotalTransactions(request);
+        Long totalTrx = transactionRepository.getTotalTransactions(request.getAccountId(), request.getStatus(), request.getType());
         if (totalTrx == null || totalTrx <= 0) {
             log.info("Invalid or empty total transaction count: {}", totalTrx);
             log.info("No transactions found for the given criteria");
@@ -105,7 +105,7 @@ public class TransactionServiceImpl implements TransactionService {
         log.info("Total transaction: {}", totalTrx);
 
         // Obtenemos el detalle y lista de transacciones
-        List<TransactionResponse> transactions = transactionRepository.getTransactions(request);
+        List<TransactionResponse> transactions = transactionRepository.getTransactions(request.getAccountId(), request.getStatus(), request.getType(), request.getPage(), request.getLimit());
         if (transactions == null || transactions.isEmpty()) {
             log.info("No transactional records returned from repository");
             return Util.fillTransactionHistoryResponse(List.of(), 0L, request.getPage(), request.getLimit());

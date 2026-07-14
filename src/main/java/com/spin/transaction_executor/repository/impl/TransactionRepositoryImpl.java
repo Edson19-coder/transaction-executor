@@ -65,7 +65,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     }
 
     @Override
-    public List<TransactionResponse> getTransactions(TransactionHistoryRequest request) {
+    public List<TransactionResponse> getTransactions(String accountId, String status, CardType type, Integer page, Integer limit) {
         log.info("Executing procedure PKG_TRANSACTION.GET_TRANSACTION()");
         EntityManager em = entityManagerFactory.createEntityManager();
         try{
@@ -77,11 +77,11 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                         .registerStoredProcedureParameter(4, Integer.class, ParameterMode.IN)
                         .registerStoredProcedureParameter(5, Integer.class, ParameterMode.IN)
                         .registerStoredProcedureParameter(6, Class.class, ParameterMode.REF_CURSOR)
-                        .setParameter(1, StringUtils.isNotEmpty(request.getAccountId()) ? request.getAccountId() : "null")
-                        .setParameter(2, StringUtils.isNotEmpty(request.getStatus()) ? request.getStatus() : "null")
-                        .setParameter(3, request.getType() != null ? request.getType().name() : "null")
-                        .setParameter(4, request.getPage())
-                        .setParameter(5, request.getLimit());
+                        .setParameter(1, StringUtils.isNotEmpty(accountId) ? accountId : "null")
+                        .setParameter(2, StringUtils.isNotEmpty(status) ? status : "null")
+                        .setParameter(3, type != null ? type.toString() : "null")
+                        .setParameter(4, page)
+                        .setParameter(5, limit);
                 query.execute();
                 List<TransactionDbEntity> rptTrx = query.getResultList();
                 return rptTrx.stream().map(Util::mapGetTransactions).toList();
@@ -95,7 +95,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     }
 
     @Override
-    public Long getTotalTransactions(TransactionHistoryRequest request) {
+    public Long getTotalTransactions(String accountId, String status, CardType type) {
         log.info("Executing procedure PKG_TRANSACTION.GET_TRANSACTION_COUNT()");
         EntityManager em = entityManagerFactory.createEntityManager();
         try{
@@ -105,9 +105,9 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                         .registerStoredProcedureParameter(2, String.class, ParameterMode.IN)
                         .registerStoredProcedureParameter(3, String.class, ParameterMode.IN)
                         .registerStoredProcedureParameter(4, Long.class, ParameterMode.OUT)
-                        .setParameter(1, StringUtils.isNotEmpty(request.getAccountId()) ? request.getAccountId() : "null")
-                        .setParameter(2, StringUtils.isNotEmpty(request.getStatus()) ? request.getStatus() : "null")
-                        .setParameter(3, request.getType() != null && StringUtils.isNotEmpty(request.getType().toString()) ? request.getType().toString() : "null");
+                        .setParameter(1, StringUtils.isNotEmpty(accountId) ? accountId : "null")
+                        .setParameter(2, StringUtils.isNotEmpty(status) ? status : "null")
+                        .setParameter(3, type != null ? type.toString() : "null");
                 query.execute();
                 return Objects.nonNull(query.getOutputParameterValue(4)) ? Long.parseLong(query.getOutputParameterValue(4).toString()) : null;
             }
