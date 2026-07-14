@@ -46,8 +46,7 @@ class TransactionControllerTest {
         request.setCurrency("MXN");
         request.setDescription("Transferencia recibida");
 
-        when(transactionService.sendTransaction(any()))
-                .thenReturn(ResponseEntity.ok().build());
+        when(transactionService.sendTransaction(any())).thenReturn(any());
 
         mockMvc.perform(post(TRANSACTION_MAPPING)
                         .header(Constants.API_KEY_HEADER, VALID_API_KEY)

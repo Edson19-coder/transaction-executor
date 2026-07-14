@@ -1,13 +1,17 @@
 package com.spin.transaction_executor.service;
 
 import com.spin.transaction_executor.client.HttpProviderClient;
+import com.spin.transaction_executor.domain.exception.impl.BusinessRuleException;
 import com.spin.transaction_executor.domain.request.TransactionHistoryRequest;
 import com.spin.transaction_executor.domain.request.TransactionRequest;
 import com.spin.transaction_executor.domain.response.ProviderTransactionResponse;
+import com.spin.transaction_executor.domain.response.TransactionResponse;
+import com.spin.transaction_executor.domain.response.list.TransactionHistoryResponse;
 import com.spin.transaction_executor.repository.TransactionRepository;
 import com.spin.transaction_executor.service.impl.TransactionServiceImpl;
 import com.spin.transaction_executor.util.CardType;
 import com.spin.transaction_executor.util.Constants;
+import com.spin.transaction_executor.util.Status;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +25,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -60,10 +63,15 @@ class TransactionServiceImplTest {
     void sendTransaction_ShouldFail_WhenDebitAmountExceedsLimit() {
         validRequest.setAmount(new BigDecimal("10001.00"));
 
-        ResponseEntity<?> response = transactionService.sendTransaction(validRequest);
+        BusinessRuleException exception = assertThrows(BusinessRuleException.class, () -> {
+            transactionService.sendTransaction(validRequest);
+        });
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
+        assertNotNull(exception.getData());
+        assertInstanceOf(TransactionResponse.class, exception.getData());
+        TransactionResponse failedResponse = (TransactionResponse) exception.getData();
+        assertEquals(Status.REJECTED.toString(), failedResponse.getStatus());
+        assertEquals("Debit transactions cannot exceed $10,000.00 per transaction", failedResponse.getDescription());
         verify(transactionRepository, times(1)).saveTransaction(any());
         verifyNoInteractions(httpProviderClient);
     }
@@ -72,9 +80,15 @@ class TransactionServiceImplTest {
     void sendTransaction_ShouldFail_WhenUnsupportedCurrency() {
         validRequest.setCurrency("USD");
 
-        ResponseEntity<?> response = transactionService.sendTransaction(validRequest);
+        BusinessRuleException exception = assertThrows(BusinessRuleException.class, () -> {
+            transactionService.sendTransaction(validRequest);
+        });
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(exception.getData());
+        assertInstanceOf(TransactionResponse.class, exception.getData());
+        TransactionResponse failedResponse = (TransactionResponse) exception.getData();
+        assertEquals(Status.REJECTED.toString(), failedResponse.getStatus());
+        assertEquals("Unsupported currency type", failedResponse.getDescription());
         verify(transactionRepository, times(1)).saveTransaction(any());
     }
 
@@ -89,9 +103,8 @@ class TransactionServiceImplTest {
         when(httpProviderClient.executeTransaction(any())).thenReturn(providerResponse);
         when(transactionRepository.saveTransaction(any())).thenReturn(true);
 
-        ResponseEntity<?> response = transactionService.sendTransaction(validRequest);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        TransactionResponse response = transactionService.sendTransaction(validRequest);
+        assertEquals(Status.EXECUTED.toString(), response.getStatus());
         verify(transactionRepository, times(1)).saveTransaction(any());
     }
 
@@ -104,10 +117,7 @@ class TransactionServiceImplTest {
 
         when(transactionRepository.getTotalTransactions(any())).thenReturn(0L);
 
-        ResponseEntity<?> response = transactionService.getTransactions(historyRequest);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        Map<String, String> body = (Map<String, String>) response.getBody();
-        assertEquals("No transactions to show", body.get("message"));
+        TransactionHistoryResponse response = transactionService.getTransactions(historyRequest);
+        assertTrue(response.getTransactions().isEmpty());
     }
 }

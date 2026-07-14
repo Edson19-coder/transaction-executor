@@ -33,6 +33,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionResponse sendTransaction(TransactionRequest request) {
+        log.info(Constants.EXECUTING, "sendTransaction");
         TransactionResponse response = null;
         try {
             /*
@@ -88,6 +89,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionHistoryResponse getTransactions(TransactionHistoryRequest request) {
+        log.info(Constants.EXECUTING, "getTransactions");
         // Validamos que la petición siempre sea valida
         if (!Util.validTransactionHistoryRequest(request)) {
             throw new BusinessRuleException("Invalid request");
