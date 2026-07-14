@@ -115,7 +115,7 @@ class TransactionServiceImplTest {
         historyRequest.setPage(1);
         historyRequest.setLimit(10);
 
-        when(transactionRepository.getTotalTransactions(any())).thenReturn(0L);
+        when(transactionRepository.getTotalTransactions(any(), any(), any())).thenReturn(0L);
 
         TransactionHistoryResponse response = transactionService.getTransactions(historyRequest);
         assertTrue(response.getTransactions().isEmpty());
